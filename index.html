@@ -64,13 +64,13 @@
         id="main-title"
         class="text-4xl lg:text-5xl text-white transition-all duration-1000"
       >
-        Generátor Zábavy
+        GENERÁTOR ZÁBAVY
       </h1>
       <div
         id="meme-display"
         class="bg-black border-2 border-gray-800 min-h-[500px] flex items-center justify-center my-6 relative transition-all duration-100 z-10"
       >
-        <p id="loading-text" class="text-2xl text-gray-600">Čekám.</p>
+        <p id="loading-text" class="text-2xl text-gray-600">Loading..</p>
         <img
           id="meme-image"
           src=""
@@ -83,7 +83,7 @@
         id="main-button"
         class="px-8 py-4 text-lg font-bold rounded-md transition-all duration-500 bg-green-600 hover:bg-green-500 text-white"
       >
-        [ZAČNI]
+        [ZAČÍT]
       </button>
       <p
         id="lore-text"
@@ -197,7 +197,7 @@
           el.body.requestFullscreen().catch(err => { console.warn(`Chyba při žádosti o fullscreen (často vyžaduje https): ${err.message}`); });
           [el.amb,el.st,el.hb,el.dr,el.scr,el.sfx,el.debrief].forEach(a=>{a.volume=0;a.play().catch(()=>{});});
           el.st.src=snds.st;el.hb.src=snds.hb;el.dr.src=snds.dr;el.scr.src=snds.scr;el.sfx.src=snds.glitch;el.debrief.src=snds.debrief;
-          el.btn.textContent="[START]";
+          el.btn.textContent="[POKRAČOVAT]";
           aud=1;
       }
       
@@ -310,9 +310,9 @@
           }, 2000);
       }
       
-      // Vytvoří a animuje "oči" na pozadí
+      // Oči
       function createEyes(numEyes) {
-          el.eyesCont.innerHTML = ''; // Vyčistí staré oči, pokud by se funkce volala vícekrát
+          el.eyesCont.innerHTML = ''; 
           for (let i = 0; i < numEyes; i++) {
               const eye = document.createElement('div'); eye.className = 'eye';
               const pupil = document.createElement('div'); pupil.className = 'pupil';
