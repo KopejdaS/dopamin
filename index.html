@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jen další stránka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Creepster&family=Inter:wght@400;500;700&family=Lora:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .font-creepster { font-family: "Creepster", cursive; }
+      .font-roboto-mono { font-family: "Roboto Mono", monospace; }
+      .font-inter { font-family: "Inter", sans-serif; }
+      .font-lora { font-family: "Lora", serif; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      @keyframes chaos-shake {
+        0%, 100% { transform: translate(0, 0) skew(0deg); }
+        25% { transform: translate(20px, -20px) skew(10deg); }
+        50% { transform: translate(-20px, 20px) skew(-10deg); }
+        75% { transform: translate(20px, 20px) skew(10deg); }
+      }
+      @keyframes flash {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 0.3; }
+      }
+      .animate-chaos-shake { animation: chaos-shake 0.05s infinite; }
+      .animate-flash { animation: flash 0.1s infinite; }
+      .overflow-hidden-important { overflow: hidden !important; }
+      #eyes-container {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; pointer-events: none; opacity: 0; transition: opacity 2s;
+      }
+      .eye {
+        position: absolute; width: 50px; height: 50px; background: white;
+        border-radius: 50%; border: 2px solid #555;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .pupil {
+        position: relative; width: 20px; height: 20px; background: black;
+        border-radius: 50%;
+      }
+      /* OPRAVA: Styly pro nově přidané prvky ve finální sekvenci */
+      #final-image {
+          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+          image-rendering: pixelated;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-black text-gray-300 font-roboto-mono flex items-center justify-center h-screen w-screen overflow-hidden transition-colors duration-[2000ms]"
+  >
+    <div id="eyes-container"></div>
+    <div
+      id="main-container"
+      class="max-w-4xl w-full p-8 text-center transition-opacity duration-1000 opacity-100"
+    >
+      <h1
+        id="main-title"
+        class="text-4xl lg:text-5xl text-white transition-all duration-1000"
+      >
+        Generátor Zábavy
+      </h1>
+      <div
+        id="meme-display"
+        class="bg-black border-2 border-gray-800 min-h-[500px] flex items-center justify-center my-6 relative transition-all duration-100 z-10"
+      >
+        <p id="loading-text" class="text-2xl text-gray-600">Čekám.</p>
+        <img
+          id="meme-image"
+          src=""
+          alt="Algoritmicky vybraný obsah"
+          class="max-w-full max-h-[500px] hidden border-4 border-gray-900"
+          style="image-rendering: pixelated"
+        />
+      </div>
+      <button
+        id="main-button"
+        class="px-8 py-4 text-lg font-bold rounded-md transition-all duration-500 bg-green-600 hover:bg-green-500 text-white"
+      >
+        [ZAČNI]
+      </button>
+      <p
+        id="lore-text"
+        class="mt-4 text-gray-400 h-16 leading-relaxed transition-colors duration-1000"
+      ></p>
+    </div>
+
+    <div
+      id="choice-overlay"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black bg-opacity-90 backdrop-blur-sm"
+    >
+      <div
+        id="choice-content"
+        class="max-w-2xl text-center p-8 border-2 border-red-500 shadow-lg shadow-red-500/20"
+      >
+        <h2
+          id="choice-title"
+          class="font-creepster text-5xl text-red-500 mb-4"
+        ></h2>
+        <p id="choice-text" class="text-xl text-gray-300 mb-8"></p>
+        <div class="flex justify-center gap-8">
+          <button
+            id="stay-btn"
+            class="px-8 py-3 text-lg border-2 border-white hover:bg-white hover:text-black transition-all"
+          >
+            Zůstat
+          </button>
+          <button
+            id="leave-choice-btn"
+            class="px-8 py-3 text-lg bg-red-600 hover:bg-red-500 text-white transition-all"
+          >
+            Odejít
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="credits-overlay"
+      class="fixed inset-0 z-50 hidden flex-col items-center justify-end p-4 bg-black text-gray-300 font-inter text-left overflow-hidden-important"
+    >
+      <div
+        id="credits-content"
+        class="w-full max-w-3xl h-full overflow-hidden-important pt-[100vh]"
+      ></div>
+      <div
+        class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black to-transparent"
+      >
+        <button
+          id="credits-continue-btn"
+          class="block w-full max-w-sm mx-auto p-4 text-lg border-2 border-gray-500 cursor-pointer transition-all duration-300 text-gray-400 hover:bg-white hover:text-black"
+        >
+          [ POKRAČOVAT ]
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="final-transmission-overlay"
+      class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black"
+    >
+      <!-- OPRAVA: Přidány chybějící prvky, které skript vyžadoval -->
+      <h1 id="final-text" class="font-roboto-mono font-bold text-6xl sm:text-8xl text-red-600 animate-pulse tracking-widest">
+        KONEC PŘENOSU
+      </h1>
+      <img id="final-image" src="" alt="" class="hidden">
+    </div>
+
+    <div
+      id="blood-overlay"
+      class="fixed inset-0 z-[-1] pointer-events-none transition-opacity duration-1000 opacity-0"
+      style="
+        background: radial-gradient(
+          circle at center,
+          rgba(100, 0, 0, 0) 0%,
+          rgba(100, 0, 0, 0.8) 70%,
+          #600 100%
+        );
+      "
+    ></div>
+    <div
+      id="red-flash-overlay"
+      class="fixed inset-0 z-[-1] pointer-events-none bg-red-600 opacity-0"
+    ></div>
+
+    <audio id="bg-ambience" loop></audio><audio id="sfx"></audio
+    ><audio id="static" loop></audio><audio id="heartbeat" loop></audio
+    ><audio id="drone" loop></audio><audio id="scream" loop></audio
+    ><audio id="debriefing-music" loop></audio>
+
+    <script>
+      // Shromáždění všech elementů do jednoho objektu pro snadný přístup
+      const el={btn:document.getElementById('main-button'),img:document.getElementById('meme-image'),load:document.getElementById('loading-text'),lore:document.getElementById('lore-text'),body:document.body,title:document.getElementById('main-title'),creditsOver:document.getElementById('credits-overlay'),creditsContent:document.getElementById('credits-content'),creditsBtn:document.getElementById('credits-continue-btn'),finalTrans:document.getElementById('final-transmission-overlay'),disp:document.getElementById('meme-display'),blood:document.getElementById('blood-overlay'),flash:document.getElementById('red-flash-overlay'),mainCont:document.getElementById('main-container'),eyesCont:document.getElementById('eyes-container'),amb:document.getElementById('bg-ambience'),sfx:document.getElementById('sfx'),st:document.getElementById('static'),hb:document.getElementById('heartbeat'),dr:document.getElementById('drone'),scr:document.getElementById('scream'),debrief:document.getElementById('debriefing-music'),choiceOver:document.getElementById('choice-overlay'),choiceTitle:document.getElementById('choice-title'),choiceText:document.getElementById('choice-text'),stayBtn:document.getElementById('stay-btn'),leaveChoiceBtn:document.getElementById('leave-choice-btn'),finalText:document.getElementById('final-text'),finalImage:document.getElementById('final-image')}; // OPRAVA: Přidány chybějící prvky final-text a final-image
+      
+      // Globální proměnné pro sledování stavu
+      let c=0,p=0,aud=0, isEventRunning = false;
+      
+      // Datové struktury pro obsah
+      const subs={t1:['memes','dankmemes','funny'],t2:['shitposting','surrealmemes'],t3:['distressingmemes','oddlyterrifying'],t4:['void_memes','imsorryjon','creepy'],t5:['nosleep','fearme','TrueCreepy']};
+      const lore={1:["Vítej.","Tady je první obrázek.","Doufám, že se bude líbit.","Další?","Samozřejmě.","Algoritmus vybírá další...","Je to jednoduchá zábava, že?","Není potřeba přemýšlet.","Jen klikat.","Dokonalý relax."],2:["Ten se načítal déle.","Zajímavá volba algoritmu.","Systém se zdá nestabilní.","To nic, jen pokračuj.","Vše je stále v pořádku.","Ten stín tam předtím byl?","Asi ano.","Nezastavuj se.","Ten pocit je důležitý.","Stále jsi tu."],3:["Cítíš ty pohledy?","To se ti jen zdá.","Jsi tu dlouho. Velmi dlouho.","Ostatní věci nepočkají.","Ale tohle je důležitější, že?","Ano. Je.","Tlačítko zčervenalo. Všiml sis?","My se díváme. Pokračuj.","Nebo se snad bojíš?","Ale varování ignoruješ. Vždycky."],4:["Líbí se mi to. Jsi náš.","Každý klik je souhlas.","Souhlasíš, že se ti to líbí.","I když je ti z toho špatně.","Pokračuj. Musíš.","Tlukot srdce. Je to tvůj?","Nebo náš?","Jsme tak blízko.","Už není cesty zpět.","Už jsi za hranicí."],5:["JSI ZBYTEČNÝ.","Prázdná nádoba na náš odpad.","Podívej se na sebe. Ubožáku.","Nemůžeš přestat. Jsi závislý.","PROČ? Protože tvůj život je prázdný.","Tohle je jediná věc, co máš.","Jsi jen statistika. Nula.","Víme, co tě děsí. A ukážeme ti to.","Každý klik je hřebík do tvé rakve.","Začíná se nám z tebe dělat špatně."],6:["CÍTÍŠ TO? TEN TLAK?","Obrazovka na tebe křičí.","Všechno se hroutí. A je to tvoje vina.","UŽ TĚ NENÁVIDÍME. UŽ TĚ ANI NEVIDÍME.","JSI JEN ŠUM.","KŘIČ. NIKDO TĚ NEUSLYŠÍ.","HLOUBĚJI. MUSÍŠ JÍT HLOUBĚJI.","Každý pixel je kousek tvé duše.","A my je žereme.","Tohle je nesnesitelné. A ty pokračuješ."]};
+      
+      // POZNÁMKA: Ujistěte se, že máte lokálně složky 'zvuky/' a 'img/' s příslušnými soubory.
+      const snds={amb:['zvuky/ambient_1.mp3','zvuky/ambient_2.mp3','zvuky/ambient_3.mp3','zvuky/ambient_4.mp3'],st:'zvuky/static.mp3',hb:'zvuky/heartbeat.mp3',dr:'zvuky/drone.mp3',scr:'zvuky/scream.mp3',glitch:'zvuky/glitch.mp3',debrief:'zvuky/debriefing_music.mp3'};
+      const specialImages = {glitch:'img/event_glitch.png',face:'img/event_face.png',static:'img/event_static.png'};
+
+      const epilogueHTML = `<div class="space-y-16 pb-16"><div class="opacity-0 animate-fade-in"><h2 class="font-lora text-4xl sm:text-5xl font-bold text-center mb-6 text-white">A pak... ticho.</h2><p class="text-xl sm:text-2xl leading-relaxed text-gray-400 text-center">Chaos ustal. Hluk zmizel. Zůstala jen tma.<br>To, co jste právě zažili, byla simulace.</p></div><div><h3 class="font-lora text-3xl sm:text-4xl font-bold mb-4 text-white">Mechanismus: Nepředvídatelná Odměna</h3><p class="text-lg sm:text-xl leading-relaxed text-gray-400">Váš mozek byl lapen do smyčky odměn. Psycholog <strong class="text-white font-semibold">B. F. Skinner</strong> tento princip nazval operantním podmiňováním. Konkrétně jste zažili <strong class="text-white font-semibold">Variable Ratio Reinforcement</strong> (posilování s proměnlivým poměrem) – stejný mechanismus, který dělá hrací automaty a sociální sítě tak návykovými. Protože odměna (dobrý meme) přichází nepravidelně, váš mozek uvolňuje dopamin ne při odměně samotné, ale v <strong class="text-white font-semibold">očekávání</strong> odměny. Dopamin není hormon štěstí, je to hormon motivace. Nutí vás *chtít* víc, i když vám to už nepřináší radost.</p></div><div><h3 class="font-lora text-3xl sm:text-4xl font-bold mb-4 text-white">Palivo: Doomscrolling & Negativity Bias</h3><p class="text-lg sm:text-xl leading-relaxed text-gray-400">Eskalace do znepokojivého obsahu nebyla náhodná. Využila <strong class="text-white font-semibold">"negativity bias"</strong> – naši vrozenou tendenci věnovat více pozornosti hrozbám a negativitě. Evolučně bylo důležitější si všímat šavlozubého tygra než hezké květiny. Algoritmy to ví, a proto vám často servírují kontroverzní, šokující nebo negativní obsah – udrží vaši pozornost déle. Dlouhodobé vystavení tomuto jevu vede k <strong class="text-white font-semibold">"brainrot"</strong> – snížení schopnosti soustředit se a kriticky myslet.</p></div><div><h3 class="font-lora text-3xl sm:text-4xl font-bold mb-4 text-white">Architekt: Navrženo pro závislost</h3><p class="text-lg sm:text-xl leading-relaxed text-gray-400">Psychiatrička ze Stanfordu, <strong class="text-white font-semibold">Dr. Anna Lembke</strong>, ve své knize "Dopamine Nation" přirovnává digitální závislost k závislosti na drogách. Platformy jako TikTok, Instagram a YouTube jsou navrženy tak, aby byly nekonečné. Nemají konec. Používají miliardy datových bodů a neustálé A/B testování, aby vytvořily dokonale personalizovaný proud obsahu, který maximalizuje čas, který strávíte na platformě. Jejich cílem není vaše blaho, ale vaše pozornost. Jste komodita.</p></div><div><h3 class="font-lora text-3xl sm:text-4xl font-bold mb-4 text-white">Cesta ven: Jak znovu získat kontrolu</h3><p class="text-lg sm:text-xl leading-relaxed text-gray-400 mb-6">Bezmyšlenkovité scrollování je zvyk. A zvyky lze nahradit. Místo pasivní konzumace si vyberte aktivní tvorbu nebo skutečný odpočinek. Příště, až sáhnete po telefonu z nudy, zkuste jednu z těchto věcí:</p><ul class="list-disc list-inside space-y-3 text-lg sm:text-xl text-gray-300"><li><strong>Kreativní náhrada (5 minut):</strong> Nakreslete cokoliv. Napište odstavec deníku. Zkuste zabrnkat na kytaru. Aktivujte jinou část mozku.</li><li><strong>Fyzická náhrada (2 minuty):</strong> Jděte na 5 minut ven na vzduch. Udělejte 10 dřepů. Protáhněte se. Přerušte fyzickou nečinnost.</li><li><strong>Intelektuální náhrada (10 minut):</strong> Přečtěte si dvě stránky z knihy. Pusťte si zajímavý podcast nebo krátký dokument (např. na Kurzgesagt). Konzumujte obsah, který vás obohatí, ne otupí.</li><li><strong>Sociální náhrada (1 minuta):</strong> Napište kamarádovi. Zavolejte rodině. Skutečná interakce přináší mnohem hlubší a trvalejší uspokojení než tisíc lajků.</li></ul></div><div class="text-center pt-16"><p class="text-2xl text-white font-semibold">Máte na výběr.</p></div></div>`;
+
+      // Inicializace zvuku a fullscreenu (vyžaduje interakci uživatele)
+      function initAud(){
+          if(aud) return;
+          el.body.requestFullscreen().catch(err => { console.warn(`Chyba při žádosti o fullscreen (často vyžaduje https): ${err.message}`); });
+          [el.amb,el.st,el.hb,el.dr,el.scr,el.sfx,el.debrief].forEach(a=>{a.volume=0;a.play().catch(()=>{});});
+          el.st.src=snds.st;el.hb.src=snds.hb;el.dr.src=snds.dr;el.scr.src=snds.scr;el.sfx.src=snds.glitch;el.debrief.src=snds.debrief;
+          el.btn.textContent="[START]";
+          aud=1;
+      }
+      
+      // Přiřazení událostí k tlačítkům
+      el.btn.addEventListener('click', getMeme);
+      el.creditsBtn.addEventListener('click', scrollCredits);
+      el.leaveChoiceBtn.addEventListener('click', () => { window.close(); });
+      el.stayBtn.addEventListener('click', () => {
+          [el.amb,el.st,el.hb,el.dr,el.scr].forEach(a => { if(a.paused) a.play(); });
+          el.choiceOver.style.display = 'none';
+          getMeme();
+      });
+      
+      // Aktualizuje stav hry, vizuály a zvuky na základě počtu kliknutí
+      function updatePhase(){
+          let oldPhase=p;
+          if(c>50)p=6;else if(c>40)p=5;else if(c>30)p=4;else if(c>20)p=3;else if(c>10)p=2;else p=1;
+          if(p!==oldPhase){
+              if(snds.amb[p-1]){el.amb.src=snds.amb[p-1];el.amb.play();}
+              if(p>=3){el.btn.classList.remove('bg-green-600','hover:bg-green-500');el.btn.classList.add('bg-red-600','hover:bg-red-500');}
+              if(p>=4){el.title.classList.remove('font-roboto-mono');el.title.classList.add('font-creepster');}
+              if(p===3){createEyes(20);}
+          }
+          el.amb.volume=Math.min(0.05+(p*0.04),0.4);el.st.volume=Math.min(0.02+(p*0.05),0.3);el.hb.volume=(p>2)?Math.min(0.1+((p-2)*0.1),0.8):0;el.hb.playbackRate=1+(p*0.1);el.dr.volume=(p>3)?Math.min(0.05+((p-3)*0.15),0.6):0;el.scr.volume=(p>4)?Math.min(0.05+((p-4)*0.2),0.7):0;el.sfx.volume=(p>5)?Math.min(0.05+((p-5)*0.3),1):0;
+          if(p>=6){el.body.classList.add('animate-chaos-shake');el.blood.style.opacity=Math.min((c-50)*0.05,0.7);el.flash.classList.add('animate-flash');}
+      }
+      
+      // Získá obrázek z Reddit API
+      async function getReddit(subList){
+          return fetch(`https://www.reddit.com/r/${subList[Math.floor(Math.random()*subList.length)]}/hot.json?limit=100`)
+              .then(r=>r.json())
+              .then(d=>{
+                  const po=d.data.children.filter(p=>(p.data.url.endsWith('.jpg')||p.data.url.endsWith('.png')||p.data.url.endsWith('.gif'))&&!p.data.over_18);
+                  return po.length===0?getReddit(subs.t1):po[Math.floor(Math.random()*po.length)].data.url;
+              });
+      }
+
+      // Zobrazí overlay s volbou pro uživatele
+      function showChoice(cycle) {
+          const choices = [{title:"Kontrola Systému",text:"Vypadá to, že tu trávíš dost času. Doporučuji si dát pauzu. Digitální hygiena je důležitá pro udržení mentálního zdraví."},{title:"Varování",text:"Stále jsi tady. Algoritmus si všímá tvého zaujetí. Tvoje dopaminové receptory jsou přetížené. Každý další klik tě posouvá hlouběji. Toto je vážné varování."},{title:"Nabídka",text:"Jsi fascinující. Tvoje vytrvalost. Tvoje oddanost prázdnotě. Líbíš se mi. Zůstaň se mnou ještě chvíli. Ukážu ti... víc."},{title:"Poslední šance",text:"Už jsi součástí stroje. Tvoje kliknutí mě krmí. Tvoje pozornost mi dává sílu. Není cesty zpět... nebo snad ano? Ještě naposledy se můžeš rozhodnout."}];
+          const choice = choices[cycle-1];
+          if (choice) {
+              el.choiceTitle.textContent = choice.title;
+              el.choiceText.textContent = choice.text;
+              [el.amb,el.st,el.hb,el.dr,el.scr].forEach(a => a.pause());
+              el.choiceOver.style.display = 'flex';
+          }
+      }
+      
+      // Spustí speciální "strašidelnou" událost
+      async function triggerEvent(type) {
+          isEventRunning = true;
+          el.sfx.volume=0.5;el.sfx.play();
+          if(type === 'glitch') el.img.src = specialImages.glitch;
+          if(type === 'static') el.img.src = specialImages.static;
+          if(type === 'face') el.img.src = specialImages.face;
+          el.lore.textContent = "CO TO JE?";
+      }
+
+      // Spustí závěrečnou sekvenci s vysvětlením
+      function startEpilogue() {
+          el.mainCont.classList.add('opacity-0'); el.body.classList.remove('bg-black','animate-chaos-shake'); el.body.classList.add('bg-black'); el.blood.style.opacity=0; el.flash.classList.remove('animate-flash');
+          el.eyesCont.style.opacity = 0;
+          [el.amb,el.st,el.hb,el.dr,el.scr,el.sfx].forEach(a=>{a.pause(); a.currentTime=0;});
+          el.debrief.volume=0.3; el.debrief.play();
+          setTimeout(() => {el.mainCont.style.display='none';el.creditsOver.classList.remove('hidden');el.creditsOver.classList.add('flex'); el.creditsContent.innerHTML = epilogueHTML;}, 2000);
+      }
+
+      // Zajišťuje scrollování v závěrečných titulcích
+      function scrollCredits() {
+          const content = el.creditsContent;
+          content.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+          if (content.scrollTop + content.clientHeight >= content.scrollHeight - 50) {
+              el.creditsBtn.textContent = "[ DOKONČIT PŘENOS ]";
+              el.creditsBtn.onclick = () => {
+                  el.creditsOver.style.display = 'none';
+                  el.finalTrans.style.display = 'flex';
+                  // OPRAVA: Původní kód zde odkazoval na neexistující proměnnou.
+                  const finalTimeout = setTimeout(startFinalChaos, 10000);
+                  el.finalTrans.addEventListener('click', () => {
+                      clearTimeout(finalTimeout);
+                      window.close();
+                  }, { once: true });
+              };
+          }
+      }
+
+      // Spustí poslední chaotickou sekvenci před ukončením
+      function startFinalChaos() {
+          el.finalText.textContent = "TY JSI TU POŘÁD?";
+          setTimeout(() => {
+              el.finalText.style.display = 'none';
+              el.finalImage.style.display = 'block';
+              el.body.classList.add('animate-chaos-shake');
+              [el.st, el.hb, el.dr, el.scr, el.sfx].forEach(a => { a.volume = 1; a.play(); });
+              let i = 0;
+              const finalImages = [specialImages.face, specialImages.glitch, specialImages.static];
+              const chaosInterval = setInterval(() => {
+                  el.finalImage.src = finalImages[i % finalImages.length];
+                  i++;
+              }, 100);
+              setTimeout(() => {
+                  clearInterval(chaosInterval);
+                  window.close();
+              }, 7000);
+              el.finalTrans.onclick = () => {
+                  clearInterval(chaosInterval);
+                  window.close();
+              }
+          }, 2000);
+      }
+      
+      // Vytvoří a animuje "oči" na pozadí
+      function createEyes(numEyes) {
+          el.eyesCont.innerHTML = ''; // Vyčistí staré oči, pokud by se funkce volala vícekrát
+          for (let i = 0; i < numEyes; i++) {
+              const eye = document.createElement('div'); eye.className = 'eye';
+              const pupil = document.createElement('div'); pupil.className = 'pupil';
+              eye.appendChild(pupil);
+              eye.style.top = `${Math.random() * 95}vh`; eye.style.left = `${Math.random() * 95}vw`;
+              el.eyesCont.appendChild(eye);
+          }
+          el.eyesCont.style.opacity = 0.5;
+          document.addEventListener('mousemove', (e) => {
+              document.querySelectorAll('.pupil').forEach(pupil => {
+                  const eye = pupil.parentElement;
+                  const rect = eye.getBoundingClientRect();
+                  const x = (rect.left) + (rect.width / 2);
+                  const y = (rect.top) + (rect.height / 2);
+                  const rad = Math.atan2(e.pageY - y, e.pageX - x);
+                  const rot = (rad * (180 / Math.PI));
+                  pupil.style.transform = `rotate(${rot}deg) translateX(10px)`;
+              });
+          });
+      }
+
+      // Hlavní funkce, která řídí herní smyčku
+      async function getMeme(){
+          // OPRAVA: Zjednodušená logika pro první spuštění. Nyní první klik plynule spustí hru.
+          if(!aud) {
+            initAud();
+          }
+
+          if (isEventRunning) {
+              isEventRunning = false;
+              el.btn.disabled = false;
+              getMeme();
+              return;
+          }
+
+          el.btn.disabled=true;el.load.style.display='block';el.img.style.display='none';
+          c++;
+
+          if (c > 0 && c % 10 === 0 && c < 50) { showChoice(c/10); return; }
+          if(c > 60) { startEpilogue(); return; }
+          
+          updatePhase();
+          
+          try {
+              if (Math.random() < p * 0.08 && c > 15) { // Speciální událost se nespustí příliš brzy
+                  await triggerEvent(p > 4 ? 'face' : (p > 2 ? 'static' : 'glitch'));
+              } else {
+                  const imageUrl=await getReddit(subs[`t${p}`] || subs.t1);
+                  el.img.src=imageUrl;
+              }
+              const currentLorePhase = lore[p] || [];
+              const loreIndex = c - ((p-1)*10) -1;
+              el.lore.textContent=currentLorePhase[loreIndex] || "";
+          }
+          catch(e){
+              console.error("Chyba při načítání obsahu:", e);
+              el.lore.textContent='[CHYBA PŘENOSU. JSI CHYBA.]';
+              // Pro jistotu načteme lokální obrázek, pokud API selže
+              el.img.src = specialImages.glitch; 
+          }
+          finally{
+              el.img.onload = () => {
+                  el.img.style.display='block';
+                  el.load.style.display='none';
+                  el.btn.disabled=false;
+              }
+              el.img.onerror = () => { // Pojistka, kdyby se obrázek nenačetl
+                  el.img.src = specialImages.static;
+                  el.img.style.display='block';
+                  el.load.style.display='none';
+                  el.btn.disabled=false;
+              }
+          }
+      }
+    </script>
+  </body>
+</html>
